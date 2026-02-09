@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="uk.ac.ntu.cloudfs.ui.LoginController">
+
+    <center>
+        <VBox spacing="12" alignment="CENTER">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+
+            <Label text="CloudFS Login" styleClass="title"/>
+
+            <GridPane hgap="10" vgap="10" maxWidth="420">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Server URL:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="lbUrlField" promptText="http://localhost:8081"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Username:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="usernameField" promptText="username"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Password:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="passwordField" promptText="password"
+                               GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Login" onAction="#onLogin"/>
+                <Button text="Create New User" onAction="#onGoRegister"/>
+            </HBox>
+
+            <Label fx:id="statusLabel" text="" wrapText="true"/>
+        </VBox>
+    </center>
+
+</BorderPane>

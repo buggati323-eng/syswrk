@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="uk.ac.ntu.cloudfs.ui.MainController"
+            fx:id="root">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10" right="12" bottom="10" left="12"/>
+            </padding>
+
+            <Label text="CloudFS" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Server:"/>
+            <TextField fx:id="lbUrlField" prefWidth="260"/>
+
+            <Label text="User:"/>
+            <Label fx:id="currentUserLabel" text="-"/>
+
+            <Button text="Logout" onAction="#onLogout"/>
+        </HBox>
+    </top>
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox fx:id="sidebar" spacing="8" prefWidth="180">
+            <padding>
+                <Insets top="12" right="10" bottom="12" left="12"/>
+            </padding>
+
+            <Button fx:id="navTerminalBtn" text="Terminal" maxWidth="1.7976931348623157E308" onAction="#goTerminal"/>
+            <Button fx:id="navFilesBtn" text="Files" maxWidth="1.7976931348623157E308" onAction="#goFiles"/>
+            <Button fx:id="navShareBtn" text="Share" maxWidth="1.7976931348623157E308" onAction="#goShare"/>
+
+            <Separator/>
+
+            <Button fx:id="navAdminBtn" text="Admin"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#goAdmin"/>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT + LOADING OVERLAY -->
+    <center>
+        <StackPane fx:id="contentStack">
+            <!-- TERMINAL VIEW -->
+            <VBox fx:id="terminalView" spacing="10" visible="true" managed="true">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <Label text="Terminal" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <Label fx:id="terminalCommandsLabel" text="Commands:" wrapText="true"/>
+
+                <TextArea fx:id="terminalOut" editable="false" prefHeight="520"/>
+                <HBox spacing="10">
+                    <TextField fx:id="terminalIn" promptText="Type a command (try: help) and press Enter" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="terminalSendBtn" text="Send" onAction="#onTerminalSend"/>
+                </HBox>
+            </VBox>
+
+            <!-- FILES VIEW -->
+            <VBox fx:id="filesView" spacing="10" visible="false" managed="false">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <Label text="Files" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10">
+                    <Button fx:id="filesRefreshBtn" text="Refresh" onAction="#onFilesRefresh"/>
+                    <Label text="fileId:"/>
+                    <TextField fx:id="fileIdField" promptText="e.g. myfile" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="filesUploadBtn" text="Upload" onAction="#onFilesUpload"/>
+                    <Button fx:id="filesDownloadBtn" text="Download Selected" onAction="#onFilesDownload"/>
+                    <Button fx:id="filesDeleteBtn" text="Delete Selected" onAction="#onFilesDelete"/>
+                </HBox>
+
+                <ListView fx:id="filesList" prefHeight="520"/>
+
+                <Label fx:id="filesStatusLabel" text="" wrapText="true"/>
+            </VBox>
+
+            <!-- SHARE VIEW -->
+            <VBox fx:id="shareView" spacing="10" visible="false" managed="false">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <Label text="Share" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="120"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <Label text="fileId:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="shareFileIdField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="target user:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="shareTargetField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="permissions:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <CheckBox fx:id="shareRead" text="Read" selected="true"/>
+                        <CheckBox fx:id="shareWrite" text="Write" selected="false"/>
+                    </HBox>
+
+                    <HBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                        <Button fx:id="shareGrantBtn" text="Grant" onAction="#onShareGrant"/>
+                        <Button fx:id="shareRevokeBtn" text="Revoke" onAction="#onShareRevoke"/>
+                    </HBox>
+                </GridPane>
+
+                <Label fx:id="shareStatusLabel" text="" wrapText="true"/>
+            </VBox>
+
+            <!-- ADMIN VIEW -->
+            <VBox fx:id="adminView" spacing="10" visible="false" managed="false">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <Label text="Admin" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10">
+                    <Button fx:id="adminRefreshBtn" text="Refresh Users" onAction="#onAdminRefresh"/>
+                    <Button fx:id="adminAuditBtn" text="View Audit" onAction="#onAdminAudit"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Label text="username:"/>
+                    <TextField fx:id="adminUserField" promptText="user" />
+                    <Label text="password:"/>
+                    <TextField fx:id="adminPassField" promptText="pass" />
+                    <Label text="role:"/>
+                    <ComboBox fx:id="adminRoleBox" prefWidth="140"/>
+                    <Button fx:id="adminCreateBtn" text="Create" onAction="#onAdminCreate"/>
+                    <Button fx:id="adminSetRoleBtn" text="Set Role" onAction="#onAdminSetRole"/>
+                    <Button fx:id="adminDeleteBtn" text="Delete" onAction="#onAdminDelete"/>
+                </HBox>
+
+                <ListView fx:id="adminUsersList" prefHeight="280"/>
+
+                <Label text="Audit log (latest):"/>
+                <TextArea fx:id="adminAuditOut" editable="false" prefHeight="220"/>
+
+                <Label fx:id="adminStatusLabel" text="" wrapText="true"/>
+            </VBox>
+
+            <!-- LOADING OVERLAY -->
+            <StackPane fx:id="busyOverlay" visible="false" managed="false"
+                       style="-fx-background-color: rgba(0,0,0,0.18);">
+                <VBox alignment="CENTER" spacing="10"
+                      style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 10;">
+                    <ProgressIndicator />
+                    <Label text="Working..."/>
+                </VBox>
+            </StackPane>
+        </StackPane>
+    </center>
+
+    <!-- STATUS BAR -->
+    <bottom>
+        <HBox spacing="10">
+            <padding>
+                <Insets top="8" right="12" bottom="10" left="12"/>
+            </padding>
+            <Label fx:id="appStatusLabel" text="" wrapText="true"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

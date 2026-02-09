@@ -1,0 +1,11 @@
+.root {
+    -fx-font-size: 13px;
+}
+
+.label {
+    -fx-text-fill: #222;
+}
+
+.text-area {
+    -fx-font-family: "Menlo", "Consolas", "Monospaced";
+}
