@@ -1,0 +1,125 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: cloudfs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cloudfs
+      MYSQL_USER: cloudfs
+      MYSQL_PASSWORD: cloudfs
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [cloudfs_net]
+
+  node1:
+    build:
+      context: .
+      dockerfile: storagenode/Dockerfile
+    container_name: cloudfs-node1
+    environment:
+      NODE_ID: node-1
+      NODE_PORT: 9001
+      NODE_DATA_DIR: /data
+      NODE_DELAY_MS: 30000
+    volumes:
+      - node1_data:/data
+    networks: [cloudfs_net]
+
+  node2:
+    build:
+      context: .
+      dockerfile: storagenode/Dockerfile
+    container_name: cloudfs-node2
+    environment:
+      NODE_ID: node-2
+      NODE_PORT: 9002
+      NODE_DATA_DIR: /data
+      NODE_DELAY_MS: 90000
+    volumes:
+      - node2_data:/data
+    networks: [cloudfs_net]
+
+  node3:
+    build:
+      context: .
+      dockerfile: storagenode/Dockerfile
+    container_name: cloudfs-node3
+    environment:
+      NODE_ID: node-3
+      NODE_PORT: 9003
+      NODE_DATA_DIR: /data
+      NODE_DELAY_MS: 60000
+    volumes:
+      - node3_data:/data
+    networks: [cloudfs_net]
+
+  node4:
+    build:
+      context: .
+      dockerfile: storagenode/Dockerfile
+    container_name: cloudfs-node4
+    environment:
+      NODE_ID: node-4
+      NODE_PORT: 9004
+      NODE_DATA_DIR: /data
+      NODE_DELAY_MS: 30000
+    volumes:
+      - node4_data:/data
+    networks: [cloudfs_net]
+
+  lb:
+    build:
+      context: .
+      dockerfile: loadbalancer/Dockerfile
+    container_name: cloudfs-lb
+    depends_on:
+      mysql:
+        condition: service_healthy
+      node1:
+        condition: service_started
+      node2:
+        condition: service_started
+      node3:
+        condition: service_started
+      node4:
+        condition: service_started
+    environment:
+      LB_PORT: 8081
+      LB_SCHEDULER: round_robin
+      LB_WORKERS: 4
+      LB_QUEUE_CAP: 50
+
+      CLOUDFS_ENCRYPT: "1"
+      CLOUDFS_KEY: "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"
+
+      LB_REPLICAS: 2
+
+      # Use service names on the docker network (NOT localhost)
+      LB_NODES: "node-1=http://node1:9001,node-2=http://node2:9002,node-3=http://node3:9003,node-4=http://node4:9004"
+
+      MYSQL_URL: "jdbc:mysql://mysql:3306/cloudfs"
+      MYSQL_USER: cloudfs
+      MYSQL_PASS: cloudfs
+
+      SQLITE_PATH: /state/cloudfs_cache.db
+    volumes:
+      - lb_state:/state
+    ports:
+      - "8081:8081"
+    networks: [cloudfs_net]
+
+volumes:
+  mysql_data:
+  node1_data:
+  node2_data:
+  node3_data:
+  node4_data:
+  lb_state:
+
+networks:
+  cloudfs_net:
